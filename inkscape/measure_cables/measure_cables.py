@@ -217,10 +217,10 @@ class MeasureCables(inkex.Effect):
 		       style = get_style(node)
                        p = cubicsuperpath.parsePath(node.get('d'))
                        slengths, stotal = measure.csplength(p)
-                       cable_length =  ('{0:.'+str(self.options.precision)+'f}').format(stotal*self.factor()*self.options.scale)
+                       cable_length =  ('{0:8.'+str(self.options.precision)+'f}').format(stotal*self.factor()*self.options.scale)
                        description = self.find_desc(node)
                        try:   
-                          rpt.append("path %s x %d" % (cable_length, int(description)))
+                          #rpt.append("path %s x %d" % (cable_length, int(description)))
                           if cable_length in cables.keys():
                              cables[cable_length] += int(description)
                           else:
@@ -232,15 +232,28 @@ class MeasureCables(inkex.Effect):
                           set_style(node, style)
                        cnt += 1
 
-                       keys = cables.keys()
-                       keys.sort()
-                       sorted_cables = map(cables.get, keys)
+                       sorted_cables = cables.items()
+                       sorted_cables.sort( key=lambda cables:cables[0])
+                       #rpt.append("%s" % (cables))
 
-                       items = cables.items()
-                       items.sort( key=lambda int(cables):cables[0])
-                       rpt.append("%s" % (cables))
-                       rpt.append("%s" % (items))
+                rpt.append("%s" % (sorted_cables))
+                min_length = 10000 
+                max_length = 0
+                t_length = 0
+                t_count_cables = 0
+                for c_length, c_number in sorted_cables:
+                    # duzina kabla
+                    l = float(c_length) 
+                    if l < min_length:
+                         min_length = l
+                    if l > max_length:
+                        max_length = l
+                    t_length += l * c_number
+                    t_count_cables += c_number
+
                 rpt.append("Broj path-ova = %s" % (cnt))
+                rpt.append("min duzina kabla %s, max duzina kabla = %s" % (min_length, max_length))
+                rpt.append("Broj kablova = %s, ukupna duzina = %s" % (t_count_cables, t_length))
    
 		report_findings(rpt)
 
